@@ -5,69 +5,60 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Welcome App</title>
-    <link rel="stylesheet" type="text/css" href="public/reset.css" />
     <style>
-      html {
-        font-size: 24px;
-        background-color: #7f81a7;
+      body {
+        display: grid;
+        height: 100vh;
+        grid-template-areas:
+          'header header header'
+          'nav section aside'
+          'footer footer footer';
+        grid-gap: 8px;
+        grid-template-columns: 30% 1fr 20%;
+        grid-template-rows: 100px 1fr 50px 2fr;
       }
-      .card {
-        width: 144px;
-        margin: 0 auto;
-        text-align: center;
-        border: 3px solid #222;
+      header {
+        grid-area: header;
       }
-      .card > h1 {
-        font-size: 2rem;
-        line-height: 0.85;
-        letter-spacing: 2px;
-        font-weight: bold;
-        margin-bottom: 0.25rem;
-        background: white;
+      nav {
+        grid-area: nav;
       }
-      .card > .price {
-        color: #666;
-        font-size: 0.75rem;
-        font-weight: bold;
+      section {
+        grid-area: section;
       }
-      .card text {
-        font-weight: lighter;
-        font-size: 0.75rem;
+      aside {
+        grid-area: aside;
+      }
+      footer {
+        grid-area: footer;
       }
 
-      .card img {
-        margin-bottom: 1rem;
+      @media (max-width: 720px) {
+        body {
+          grid-template-areas:
+            'header header'
+            'nav section'
+            'aside aside'
+            'footer footer ';
+        }
       }
-      p:not (:last-child) {
-        margin-bottom: 0.5rem;
-      }
-      button {
-        border: none;
-        width: 100%;
-        background-color: black;
-        color: white;
-        padding: 0.5rem 0;
-      }
-      button:hover {
-        background-color: #444;
+      @media (max-width: 480px) {
+        body {
+          grid-template-areas:
+            'header'
+            'nav'
+            'section'
+            'aside'
+            'footer';
+        }
       }
     </style>
   </head>
-  <body >
-    <div class="card">
-      <img src="/public/img_2.png" alt="Nature" style="width: 100%" />
-      <p class="text">Perfume</p>
-      <h1>Gabrielle Essence Eau De Parfum</h1>
-            <p class="text">A floral, solar and voluptuous interpretation composed by Olivier Polge, Perfumer-Creator for the House of CHANEL.
-      </p>
-      <p class="price">$149.99</p>
-      <p><button>Lets go</button></p>
-    </div>
-    <div style="width: 200px; height: 200px; background-color: blue; position: relative">
-      <div
-        style="width: 100px; height: 100px; background-color: red; position: fixed; top: 10px"
-      ></div>
-      <div style="width: 150px;height: 150px;background-color: green"</div>
-    </div>
+  <body>
+    <header style="background-color: #f001">header</header>
+    <nav style="background-color: #ff01">nav</nav>
+    <section style="background-color: #f0f1">section</section>
+    <aside style="background-color: #0ff1">aside</aside>
+    <footer style="background-color: #f001">footer</footer>
   </body>
 </html>
