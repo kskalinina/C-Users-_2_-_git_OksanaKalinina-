@@ -1,64 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
     <title>Welcome App</title>
     <style>
-      body {
-        display: grid;
-        height: 100vh;
-        grid-template-areas:
-          'header header header'
-          'nav section aside'
-          'footer footer footer';
-        grid-gap: 8px;
-        grid-template-columns: 30% 1fr 20%;
-        grid-template-rows: 100px 1fr 50px 2fr;
-      }
-      header {
-        grid-area: header;
-      }
-      nav {
-        grid-area: nav;
-      }
-      section {
-        grid-area: section;
-      }
-      aside {
-        grid-area: aside;
-      }
-      footer {
-        grid-area: footer;
-      }
-
-      @media (max-width: 720px) {
-        body {
-          grid-template-areas:
-            'header header'
-            'nav section'
-            'aside aside'
-            'footer footer ';
-        }
-      }
-      @media (max-width: 480px) {
-        body {
-          grid-template-areas:
-            'header'
-            'nav'
-            'section'
-            'aside'
-            'footer';
-        }
+      .icon-youtube {
+          content: url('https://api.iconify.design/ph/youtube-logo-bold.svg?width=50&height=50&color=red');
       }
     </style>
   </head>
-  <body>
-    <header style="background-color: #f001">header</header>
-    <nav style="background-color: #ff01">nav</nav>
-    <section style="background-color: #f0f1">section</section>
-    <aside style="background-color: #0ff1">aside</aside>
-    <footer style="background-color: #f001">footer</footer>
+  <body class="flex h-screen flex-row justify-center items-center bg-gray-700/10">
+    <div class="w-56 p-4 bg-white rounded-xl">
+      <div class="flex flex-col">
+        <div class="flex flex-row justify-between">
+        <div class='icon-youtube'>icon</div>
+        <div>free</div>
+      </div>
+      <div class="flex flex-row" style="background-color: #ff01">
+        location YouTube
+        </div>
+      <div class="flex flex-row justify-between" style='background-color: #ff03'>
+        <div class="flex flex-col">
+          <div>Rating</div>
+          <div>4.5</div>
+        </div>
+        <div class="flex flex-col">
+          <div>Size</div>
+          <div>246</div>
+        </div>
+        <div class="flex flex-col">
+         <div>Download</div>
+         <div>5m</div>
+          </div>
+        </div>
+      <div class="flex flex-row justify-between">
+       <div class="flex flex-row" style='background-color: #ff03'>
+          icon
+          30 Mb / Sec
+        </div>
+        </div>
+    </div>
   </body>
 </html>
