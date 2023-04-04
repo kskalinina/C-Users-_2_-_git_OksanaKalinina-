@@ -1,42 +1,40 @@
-const DOM = document.getElementById.bind(document);
+const appenBlock = (block) => document.getElementById('app').appendChild(block);
+const randomRange = (min, max) => Math.floor(Math.random() * (max - min) + min);
 
-const domInpName = DOM('inpName');
-const domInpSurName = DOM('inpSurname');
-const domconResult = DOM('conResult');
-
-let fullName =""
-domInpName.oninput = function (event) {
-    console.log("onInpNameInput:", { event });
-    renderFullName();
-}
-
-domInpSurName.oninput = function (event){
-    console.log("onInpSurNameInput:", {event});
-    renderFullName()
+const createBlock = (x, y, size = 50, color) => {
+  const result = document.createElement('div');
+  if (color) {
+    result.style.backgroundColor = color;
+  } else {
+    const isNotEmpty = Math.random() > 0.5;
+  }
+  if (isNotEmpty) {
+    result.style.backgroundColor = color;
+  }
+  result.style.width = result.style.height = `${size}px`;
+  result.style.position = 'absolute';
+  result.style.left = '${x}px';
+  result.style.top = '${y}px';
+  return result;
 };
+const BLOCK_SIZE = 50;
+let columns = 5;
+let xPos = 0;
+let yPos = 0;
+const line = [];
 
 
-const getFullName = () =>`${domInpName.value} ${domInpSurName.value}`
-function renderFullName() {
-    const fullName = getFullName();
-    console.log("renderFullName:",{fullName})
-    domconResult.textContent = fullName;
-
+while (columns-- > 0) {
+  const block = createBlock(xPos, yPos, BLOCK_SIZE);
+  line.push(block);
+  xPos += BLOCK_SIZE;
+  appenBlock(block);
 }
+line.reverse().forEach((block) => {
+  xPos += BLOCK_SIZE;
+  const block = createBlock(xPos, yPos, BLOCK_SIZE);
 
-//function onInpNameInput(event) {
-    //event.stopPropagation();
-
-    //console.log("onInpNameInput:", { event });
-   //fullName = domInpName.value + " " + domInpSurName.value;
-    //fullName = `${domInpName.value} ${domInpSurName.value||"empty"}`
-    //fullName = `${domInpName.value} ${domInpSurName.value}`;
-    //domconResult.textContent = fullName;
-    //renderFullName();
-//}
-//function onInpSurnameInput(event) {
-    //console.log("onInpSurNameInput:", { event });
-    //renderFullName();}
-console.log(domInpName, domInpSurName);
+});
 
 
+document.getElementById('app').appendChild(block);
