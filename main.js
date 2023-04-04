@@ -1,6 +1,8 @@
 const appenBlock = (block) => document.getElementById('app').appendChild(block);
 const randomRange = (min, max) => Math.floor(Math.random() * (max - min) + min);
-
+const generateColor = () => {
+  
+}
 const createBlock = (x, y, size = 50, color) => {
   const result = document.createElement('div');
   if (color) {
@@ -30,11 +32,8 @@ while (columns-- > 0) {
   xPos += BLOCK_SIZE;
   appenBlock(block);
 }
-line.reverse().forEach((block) => {
+line.reverse().forEach((item) => {
+  const
   xPos += BLOCK_SIZE;
-  const block = createBlock(xPos, yPos, BLOCK_SIZE);
-
 });
 
-
-document.getElementById('app').appendChild(block);
