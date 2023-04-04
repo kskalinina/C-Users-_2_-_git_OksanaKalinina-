@@ -1,24 +1,42 @@
-import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.js'
+const DOM = document.getElementById.bind(document);
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
+const domInpName = DOM('inpName');
+const domInpSurName = DOM('inpSurname');
+const domconResult = DOM('conResult');
 
-setupCounter(document.querySelector('#counter'))
+let fullName =""
+domInpName.oninput = function (event) {
+    console.log("onInpNameInput:", { event });
+    renderFullName();
+}
+
+domInpSurName.oninput = function (event){
+    console.log("onInpSurNameInput:", {event});
+    renderFullName()
+};
+
+
+const getFullName = () =>`${domInpName.value} ${domInpSurName.value}`
+function renderFullName() {
+    const fullName = getFullName();
+    console.log("renderFullName:",{fullName})
+    domconResult.textContent = fullName;
+
+}
+
+//function onInpNameInput(event) {
+    //event.stopPropagation();
+
+    //console.log("onInpNameInput:", { event });
+   //fullName = domInpName.value + " " + domInpSurName.value;
+    //fullName = `${domInpName.value} ${domInpSurName.value||"empty"}`
+    //fullName = `${domInpName.value} ${domInpSurName.value}`;
+    //domconResult.textContent = fullName;
+    //renderFullName();
+//}
+//function onInpSurnameInput(event) {
+    //console.log("onInpSurNameInput:", { event });
+    //renderFullName();}
+console.log(domInpName, domInpSurName);
+
+
