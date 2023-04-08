@@ -1,52 +1,85 @@
-const appendBlock =(block) => document.getElementById('app').appendChild(block);
-const randomRange =(min, max) => Math.floor(Math.random() * (max - min) + min)
-const generateColor = () => {
-  const isNotEmpty = Math.random() > 0.5;
-  if (isNotEmpty) {
-    return "red";
-  }
-  return null;
+let a = ''; // first number
+let b = ''; //second number
+let sign = ''; // знак операции
+let finish = false;
+
+const digit = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'];
+const action = ['-', '+', 'X', '/'];
+// экран
+const out = document.querySelector('.scrin_calc p');
+
+function ClearAll() {
+  a = ''; // first number
+  b = ''; //second number
+  sign = ''; // знак операции
+  finish = false;
+  out.textContent = 0;
 }
-const createBlock =(x , y , size, color) => {
-  const result = document.createElement('div')
-  if (color) {
-    result.style.backgroundColor = color;
+document.querySelector('.ac').onclick =ClearAll;
+
+document.querySelector('.buttons').onclick = (event) => {
+  // нажата не кнопка
+  if(!event.target.classList.contains('btn')) return;
+  // нажата кнопка ClearAll ac
+  if(event.target.classList.contains('ac')) return;
+
+
+  out.textContent = '';
+  // получаю нажатую кнопку
+  const key = event.target.textContent
+
+  // если нажата 0-9
+  if(digit.includes(key)) {
+    if (b ==='' && sign === '') {
+    a += key;
+
+    out.textContent = a;
   }
-  result.style.width = result.style.height = `${size}px`
-  result.style.position = "absolute";
-  result.style.left = `${x}px`;
-  result.style.top = `${y}px`;
-  return result;
-};
-const BLOCK_SIZE = 50;
-const DIMENSION = 5;
-
-let columns = DIMENSION;
-let rows = columns * 2 ;
-let xPos = 0 ;
-let yPos = 0 ;
-
-
-while (rows-- > 0) {
-  let line = [];
-  xPos = 0;
-columns = DIMENSION ;
-  while (columns-- > 0) {
-    const color = generateColor()
-    const block = createBlock(xPos, yPos, BLOCK_SIZE, color);
-    line.push(block);
-    xPos += BLOCK_SIZE;
-    appendBlock(block)
-  }
-
-  line.reverse().forEach((color) => {
-    const block = createBlock(xPos, yPos, BLOCK_SIZE, color);
-    appendBlock(block)
-    xPos += BLOCK_SIZE;
-  })
-  yPos += BLOCK_SIZE;
+  else if (a!== '' && b!== '' && finish) {
+       b = key;
+      finish = false;
+      out.textContent = b;
 }
-
-
-
-
+  else {
+  b += key;
+  out.textContent = b;
+}
+  console.table(a, b, sign);
+  return;
+}
+  // ecли нажата клавиша + _ / *
+  if (action.includes(key)) {
+    sign = key;
+    out.textContent = sign;
+    console.log(a, b, sign);
+    return
+  }
+  // нажата =
+  if (key === '='){
+    if (b === '') b = a ;
+    switch (sign) {
+      case "+":
+        a = (+a) + (+b);
+        break
+      case "-":
+        a = a - b;
+        break
+      case "X":
+        a = a * b;
+        break
+      case "/":
+        if (b === '0'){
+          out.textContent = 'Ошибка'
+          a= '';
+          b= '';
+          sign= '';
+          return;
+        }
+        a = a/b;
+        break
+    }
+    finish=true;
+    out.textContent = a;
+    console.table(a, b, sign)
+  }
+}
