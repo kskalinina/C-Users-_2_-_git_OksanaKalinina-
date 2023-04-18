@@ -1,7 +1,7 @@
 import "uno.css";
 import "@unocss/reset/tailwind.css";
-import Dom from "./src/dom";
-import {randomString} from "./src/stringUtils.js";
+import Dom from "./src/constants/dom.js";
+import {randomString} from "./src/utils/stringUtils.js";
 
 const KEY_LOCAL_TASKS = 'tasks';
 const Tags = ["Web", "Update", "Design", "Content"]
@@ -40,7 +40,7 @@ tasks.forEach((taskVO) => renderTask(taskVO));
      });
  };
      getDOM(Dom.Button.CREATE_TASK).onclick = () => {
-         console.log("> domPopupCreateTask.classList");
+         console.log("> dompopupContainer.classList");
          renderTaskPopup('Create task','Create', () => {
              console.log ('> Create task -> On Confirm');
          });
@@ -62,34 +62,40 @@ function renderTask(taskVO) {
     domTaskClone.dataset.id = taskVO.id;
     QUERY(domTaskClone, Dom.Template.Task.TITLE).innerText = taskVO.title;
     domTaskColumn.prepend(domTaskClone);
-};
- function renderTaskPopup(popupTitle, btnConfirmText, confirmCallback) {
-     const domPopupCreateTask = getDOM(Dom.Popup.CREATE_TASK)
-     const domBtnClose = QUERY(domPopupCreateTask, Dom.Button.CLOSE_CREATE_TASK);
-     const domBtnConfirm = QUERY(domPopupCreateTask, Dom.Button.POPUP_CREATE_TASK_CONFIRM);
+}
 
-     const domTitle = QUERY(domPopupCreateTask, Dom.Popup.CreateTask.TITLE);
 
-     domBtnConfirm.innerText = btnConfirmText;
-     domTitle.innerText = popupTitle;
 
-     const onclosePopup = () => {
-         domPopupCreateTask.classList.add("hidden");
-         domBtnClose.onclick = null;
-         domBtnConfirm.onclick = null;
-     };
 
-     domPopupCreateTask.classList.remove("hidden");
 
-     domBtnClose.onclick = onclosePopup;
+ async function renderTaskPopup(popupTitle, confirmText, confirmCallback) {
+     const dompopupContainer = getDOM(Dom.Popup.CONTAINER);
+     const domSpinner = dompopupContainer.querySelector('.spinner');
 
-     domBtnConfirm.onclick = () => {
-         const taskTitle = randomString(12);
-         const taskDate = `task_${Date.now()}`;
-         const taskTag = Tags[0];
-         confirmCallback && confirmCallback(taskTitle, taskDate, taskTag);
-         onclosePopup();
-     };
+          dompopupContainer.classList.remove("hidden");
+
+     const TaskPopup = (await import('./src/view/popup/TaskPopup')).default;
+     const taskPopupInstance = new TaskPopup(
+         popupTitle,
+         Tags,
+         confirmText,
+         confirmCallback,
+         () => {
+             dompopupContainer.children[0].remove();
+             dompopupContainer.append(domSpinner);
+             dompopupContainer.classList.add("hidden");
+         }
+     );
+
+     setTimeout(() => {
+                 domSpinner.remove();
+                 dompopupContainer.append(taskPopupInstance.render());
+     },1000);
+
+
+     return;
+
+
  }
 
 
