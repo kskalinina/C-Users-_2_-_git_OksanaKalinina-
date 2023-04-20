@@ -17,7 +17,11 @@ class TaskPopup {
         this.#confirmCallback = confirmCallback;
         this.#closeCallback = closeCallback;
     }
-    render (){
+    #taskTitle = '';
+    set taskTitle(value){
+            this.#taskTitle = value;
+    }
+    render () {
             const div = document.createElement('div');
             div.innerHTML =  `
         <div class="flex flex-col relative min-w-[377px] bg-white p-6 rounded-2xl gap-y-4">
@@ -32,8 +36,9 @@ class TaskPopup {
                 <label class="ml-1 text-sm text-neutral-600" for="inpDate">Title: </label>
                 <input
                         class="bg-neutral-100 p-1.5 rounded w-full border-1 border-neutral-200"
-                        id="inpTitle"
+                        data-id="inpTitle"
                         type="text"
+                        value="${this.#taskTitle}"
                         placeholder="e.g. Read books"
                 />
             </div>
@@ -76,24 +81,20 @@ class TaskPopup {
 
         const domBtnClose = popup.querySelector('[data-id="btnClose"]');
         const domBtnConfirm = popup.querySelector('[data-id="btnConfirm"]');
+        const domInpTitle = popup.querySelector('[data-id= "inpTitle"]');
 
-
-        const onclosePopup = () => {
-            popup.classList.add("hidden");
+        domBtnClose.onclick = () => {
             domBtnClose.onclick = null;
             domBtnConfirm.onclick = null;
             this.#closeCallback();
-        };
+        }
 
-        domBtnClose.onclick = onclosePopup;
-
-        domBtnConfirm.onclick = () => {
-            const taskTitle = randomString(12);
+                domBtnConfirm.onclick = () => {
+            const taskTitle = domInpTitle.value;
             const taskDate = Date.now();
-            const taskTags = this.#tags//Tags[0];
+            const taskTags = this.#tags;//Tags[0];
             this.#confirmCallback(taskTitle, taskDate, taskTags);
-            onclosePopup();
-        };
+                    };
             return div.children[0];
     }
 }
