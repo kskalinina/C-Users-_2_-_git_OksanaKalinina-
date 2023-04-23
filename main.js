@@ -31,29 +31,65 @@ const tasks = rawTasks
 //const tasks = rawTasks && JSON.parse(rawTasks) || [];
 tasks.forEach((taskVO) => renderTask(taskVO));
  console.log('> tasks:', tasks);
+ const taskOperations = {
+     [Dom.Template.Task.BTN_DELETE]: (taskVO,domTask) => {
+         renderTaskPopup(taskVO, 'Confirm delete task?', 'Delete', (taskTitle, taskDate, taskTag) => {
+                 console.log('> Delete task -> On Confirm', {
+                     taskTitle,
+                     taskDate,
+                     taskTag,
+                 });
+                 tasks.splice(tasks.indexOf(taskVO), 1);
+                 domTaskColumn.removeChild(domTask);
+                 saveTask();
+             }
+         );
+     },
+     [Dom.Template.Task.BTN_EDIT]: (taskVO,domTask) => {
+         renderTaskPopup(taskVO, 'Update task', 'Update', (taskTitle, taskDate, taskTag) => {
+             console.log('> Update task -> On Confirm', {
+                 taskTitle,
+                 taskDate,
+                 taskTag,
+             });
+             taskVO.title = taskTitle;
+             const domTaskUpDated = renderTask(taskVO);
+             domTaskColumn.replaceChild(domTaskUpDated, domTask);
+             saveTask();
+         }
+         );
+     },
+      };
 
  domTaskColumn.onclick = (e) => {
      e.stopPropagation();
      console.log('domTaskColumn', e.target);
-     const domSelectedTask = e.target;
-     const taskId = domSelectedTask.dataset.id;
-     if (!taskId) return;
+     const domTaskElement = e.target;
+     const taskBtn = domTaskElement.dataset.btn;
+     const isNotTaskBtn = !taskBtn;
+     if (isNotTaskBtn) return;
+
+     const allowedButtons = [
+         Dom.Template.Task.BTN_EDIT,
+         Dom.Template.Task.BTN_DELETE,
+     ];
+     if (!allowedButtons.includes(taskBtn)) return;
+
+     let taskId;
+     let domTask = domTaskElement;
+     do {
+         domTask = domTask.parentNode;
+         taskId = domTask.dataset.id;
+     } while (!taskId);
 
      const taskVO = tasks.find((task) => task.id === taskId);
-     console.log ('> taskVO', taskVO);
-     renderTaskPopup(taskVO, 'Update task','Update', (taskTitle, taskDate,taskTag) => {
-         console.log ('> Update task -> On Confirm',{
-             taskTitle,
-             taskDate,
-             taskTag,
-         });
-         taskVO.title = taskTitle;
-         const domTaskUpDated = renderTask(taskVO);
-             domTaskColumn.replaceChild(domTaskUpDated, domSelectedTask);
-         saveTask();
+     console.log('> taskVO', taskVO);
+     const taskOperation = taskOperations[taskBtn];
+     if (taskOperations) {
+         taskOperation(taskVO, domTask);
      }
-     );
  };
+
      getDOM(Dom.Button.CREATE_TASK).onclick = () => {
          console.log("> dompopupContainer.classList");
          renderTaskPopup(null, 'Create task','Create',
