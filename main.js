@@ -89,8 +89,9 @@ tasks.forEach((taskVO) => renderTask(taskVO));
          taskOperation(taskVO, domTask);
      }
  };
-
-     getDOM(Dom.Button.CREATE_TASK).onclick = () => {
+console.log('>domPopupCreateTask', getDOM(Dom.Button.CREATE_TASK));
+getDOM(Dom.Button.CREATE_TASK).addEventListener('click', () => {
+     //getDOM(Dom.Button.CREATE_TASK).onclick = () => {
          console.log("> dompopupContainer.classList");
          renderTaskPopup(null, 'Create task','Create',
              (taskTitle, taskDate, taskTag) => {
@@ -103,7 +104,7 @@ tasks.forEach((taskVO) => renderTask(taskVO));
 
                  saveTask();
          });
-     };
+     });
 
 function renderTask(taskVO) {
     const domTaskClone = domTemplateTask.cloneNode(true);
