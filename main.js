@@ -21,12 +21,22 @@ class TaskVO {
 }
 const getDOM = (id) => document.getElementById(id);
 const QUERY = (container, id) => container.querySelector(`[data-id="${id}"]`);
+
 const domTemplateTask = getDOM(Dom.Template.TASK);
 const domTaskColumn= domTemplateTask.parentNode;
 domTemplateTask.removeAttribute('id');
 domTemplateTask.remove();
 
 const rawTasks = localStorage.getItem(KEY_LOCAL_TASKS);
+fetch('http://localhost:3000/tasks')
+    .then((response) => {
+return response.ok && response.json();
+})
+    .then((rawTasks) => {
+    if (rawTasks && rawTasks instanceof Object) {
+        console.log('json',rawTasks);
+    }
+});
 
 const tasks = rawTasks
     ? JSON.parse(rawTasks).map((json) =>  TaskVO.fromJSON(json))
