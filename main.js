@@ -1,7 +1,10 @@
 import "uno.css";
 import "@unocss/reset/tailwind.css";
 import Dom from "./src/constants/dom.js";
+import "./src/utils/timeutils.js";
 import {randomString} from "./src/utils/stringUtils.js";
+import {delay} from "./src/utils/timeutils.js";
+
 
 const KEY_LOCAL_TASKS = 'tasks';
 const Tags = ["Web", "Update", "Design", "Content"]
@@ -147,31 +150,19 @@ function renderTask(taskVO) {
 
 
 
-     setTimeout(() => {
-         console.log('render.1');
-                 domSpinner.remove();
-     document.onkeyup = (e)  => {
-         if (e.key === 'Escape') {
-             onClosePopup();
-         }
-     };
-                 dompopupContainer.append(taskPopupInstance.render());
-     },1000);
+     delay(1000).then(() => {
+         console.log('render 1');
+         domSpinner.remove();
+         document.onkeyup = (e) => {
+             if (e.key === 'Escape') {
+                 onClosePopup();
+             }
+         };
+         dompopupContainer.append(taskPopupInstance.render());
+     });
  }
-new Promise((resolve, reject) => {
-    console.log('render 2')
-    resolve();
-    console.log('render 2-1')
-})
-    .then(() => {
 
-})
-    .catch (() => {
-        console.log('render -- catch')
-    })
-    .finally(() => {
-        console.log('render -- finally')
-    })
+
 console.log('render.0')
 
 function saveTask() {
