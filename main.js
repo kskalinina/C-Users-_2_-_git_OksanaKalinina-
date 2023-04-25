@@ -147,7 +147,8 @@ function renderTask(taskVO) {
 
 
 
-    // setTimeout(() => {
+     setTimeout(() => {
+         console.log('render.1');
                  domSpinner.remove();
      document.onkeyup = (e)  => {
          if (e.key === 'Escape') {
@@ -155,8 +156,23 @@ function renderTask(taskVO) {
          }
      };
                  dompopupContainer.append(taskPopupInstance.render());
-    // },1000);
+     },1000);
  }
+new Promise((resolve, reject) => {
+    console.log('render 2')
+    resolve();
+    console.log('render 2-1')
+})
+    .then(() => {
+
+})
+    .catch (() => {
+        console.log('render -- catch')
+    })
+    .finally(() => {
+        console.log('render -- finally')
+    })
+console.log('render.0')
 
 function saveTask() {
     localStorage.setItem(KEY_LOCAL_TASKS, JSON.stringify(tasks));
