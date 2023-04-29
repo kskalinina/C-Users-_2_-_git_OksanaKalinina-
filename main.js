@@ -35,6 +35,9 @@ return response.ok && response.json();
     .then((rawTasks) => {
     if (rawTasks && rawTasks instanceof Object) {
         console.log('json',rawTasks);
+        const serverTasks = rawTasks.map((json) => TaskVO.fromJSON(json));
+        serverTasks.forEach((taskVO) => renderTask(taskVO))
+        task.push (...serverTasks);
     }
 });
 
