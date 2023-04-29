@@ -1,5 +1,5 @@
-import Dom from "../../constants/dom.js";
-import {randomString} from "../../utils/stringUtils.js";
+import Dom from "../../../constants/dom.js";
+import {randomString} from "../../../utils/stringUtils.js";
 
 class TaskPopup {
         #title;
