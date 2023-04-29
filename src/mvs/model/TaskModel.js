@@ -14,5 +14,11 @@ addUpdateCallback (updateCallback) {
         this.#updateCallbacks.push(updateCallback);
 
 }
+
+    addTask(taskVO){
+        console.log('>  tasks controller -> add task',taskVO);
+        this.#tasks.push(taskVO)
+    }
 }
+
 export default TaskModel;

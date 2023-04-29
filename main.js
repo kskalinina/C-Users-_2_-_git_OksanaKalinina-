@@ -17,6 +17,7 @@ const QUERY = (container, id) => container.querySelector(`[data-id="${id}"]`);
 
 const domTemplateTask = getDOM(Dom.Template.TASK);
 const domTaskColumn= domTemplateTask.parentNode;
+
 const taskModel = new TaskModel();
 const tasksController = new TasksController(taskModel);
 

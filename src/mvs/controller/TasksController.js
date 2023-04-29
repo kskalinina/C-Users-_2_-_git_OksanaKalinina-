@@ -24,27 +24,26 @@ class TasksController {
                 return [];
             });
     }
-    createTask (taskTitle, taskDate, taskTag)  {
+    createTask (taskTitle, taskDate, taskTags)  {
     console.log('>  tasks controller -> On Confirm');
 
-        fetch('http://localhost:3000/tasks', {
+        fetch ('http://localhost:3000/tasks', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body:JSON.stringify({
+            body: JSON.stringify({
                 title: taskTitle,
                 date:taskDate,
-                tags: taskTag,
+                tags: taskTags,
             }),
+        }).then((response) => response.json()).then( data => {
+            const taskVO = TaskVO.fromJSON(data);
+            this.#model.addTask(taskVO);
         });
 
-    const taskId = `task_${Date.now()}`;
-    const taskVO = new TaskVO(taskId, taskTitle, taskDate, taskTag);
-
-
-   // renderTask(taskVO);
-    //tasks.push(taskVO);
+   //renderTask(taskVO);
+   //tasks.push(taskVO);
 
     //saveTask();
 }
