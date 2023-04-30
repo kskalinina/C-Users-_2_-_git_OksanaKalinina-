@@ -1,11 +1,14 @@
 import "uno.css";
 import "@unocss/reset/tailwind.css";
+import 'toastify-js/src/toastify.css';
 import Dom from "./src/constants/dom.js";
 import {delay} from "./src/utils/timeutils.js";
+import Toastify from 'toastify-js'
 import dom from "./src/constants/dom.js";
 import TaskModel from "./src/mvs/model/TaskModel.js";
 import TaskVO from "./src/mvs/model/vo/TaskVO.js";
 import TasksController from "./src/mvs/controller/TasksController.js";
+
 
 
 
@@ -31,13 +34,23 @@ function renderTask(taskVO) {
     domTaskColumn.prepend(domTaskClone);
     return domTaskClone;
 }
+
+const showToastWithText = (text) =>
+  Toastify({
+    text,
+    duration: 3000,
+    close: true,
+  }).showToast();
+
 async function main() {
     taskModel.addUpdateCallback((tasks) => {
         console.log('>addUpdate: ',tasks)
        domTaskColumn.innerHTML = '';
         tasks.forEach((taskVO) => renderTask(taskVO));
     });
-    tasksController.retrieveTasks();
+    tasksController.retrieveTasks()
+      .then(() => {          })
+      .catch((e) => {});
 
     const taskOperations = {
         [Dom.Button.CREATE_TASK]: () => {
@@ -46,22 +59,34 @@ async function main() {
                         null,
                         'Create task',
                         'Create',
-                        (taskTitle, taskDate, taskTag) => {
+                        (taskTitle, taskDate, taskTags) => {
                             console.log('>  Create task -> On Confirm');
-                            tasksController.createTask(taskTitle, taskDate, taskTag)
+                            tasksController
+                              .createTask(taskTitle, taskDate, taskTags)
+                              .then((taskVO) => {
+                            console.log('>  Create task -> On Confirm: Success');
+                                showToastWithText( `You task saved: ${taskVO.title}`);
+
+                        })
+                              .catch((error) => {
+                                  console.log('>  Create task -> On Confirm: Error=', error);
+                              window.alert(`Error on server: ${error.toString()}`);
+                              });
                         }
                     );
         },
-        [Dom.Template.Task.BTN_DELETE]: (taskVO, domTask) => {
-            renderTaskPopup(taskVO, 'Confirm delete task?', 'Delete', (taskTitle, taskDate, taskTag) => {
+        [Dom.Template.Task.BTN_DELETE]: (taskId) => {
+           const taskVO = taskModel.getTaskbyId(taskId);
+          renderTaskPopup(taskVO, 'Confirm delete task?', 'Delete', (taskTitle, taskDate, taskTag) => {
                     console.log('> Delete task -> On Confirm', {
                         taskTitle,
                         taskDate,
                         taskTag,
                     });
-                    tasks.splice(tasks.indexOf(taskVO), 1);
-                    domTaskColumn.removeChild(domTask);
-                    saveTask();
+                    tasksController.deleteTask(taskId).then(() => {
+                      showToastWithText(`Task deleted: ${taskVO.title}`);
+                    })
+                      .catch((e) => {});
                 }
             );
         },
@@ -102,11 +127,9 @@ async function main() {
             taskId = domTask.dataset.id;
         } while (!taskId);
 
-        const taskVO = tasks.find((task) => task.id === taskId);
-        console.log('> taskVO', taskVO);
         const taskOperation = taskOperations[taskBtn];
         if (taskOperations) {
-            taskOperation(taskVO, domTask);
+            taskOperation(taskId, domTask);
         }
     };
     getDOM(Dom.Button.CREATE_TASK).addEventListener(
