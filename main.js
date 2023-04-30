@@ -4,10 +4,7 @@ import Dom from "./src/constants/dom.js";
 import {delay} from "./src/utils/timeutils.js";
 import dom from "./src/constants/dom.js";
 import TaskModel from "./src/mvs/model/TaskModel.js";
-import TaskVO from "./src/mvs/model/vo/TaskVO.js";
 import TasksController from "./src/mvs/controller/TasksController.js";
-
-
 
 const KEY_LOCAL_TASKS = 'tasks';
 const Tags = ["Web", "Update", "Design", "Content"]
@@ -32,23 +29,23 @@ function renderTask(taskVO) {
 }
 async function main() {
     taskModel.addUpdateCallback((tasks) => {
-        console.log('>addUpdate: ',tasks)
+        console.log('>addUpdateCallback: ',tasks)
        domTaskColumn.innerHTML = '';
         tasks.forEach((taskVO) => renderTask(taskVO));
     });
     tasksController.retrieveTasks();
 
     const taskOperations = {
-        [Dom.Button.CREATE_TASK]: () => {
-
-                    renderTaskPopup(
-                        null,
-                        'Create task',
-                        'Create',
-                        (taskTitle, taskDate, taskTag) => {
-                            console.log('>  Create task -> On Confirm');
-                            tasksController.createTask(taskTitle, taskDate, taskTag)
-                        }
+        [dom.Button.CREATE_TASK]: () => {
+            renderTaskPopup(
+              null,
+              'Create task',
+              'Create',
+              (taskTitle, taskDate, taskTags) => {
+                  console.log('> Create task -> On Confirm');
+                  tasksController
+                    .createTask(taskTitle, taskDate, taskTags)
+                        },
                     );
         },
         [Dom.Template.Task.BTN_DELETE]: (taskVO, domTask) => {
@@ -119,10 +116,11 @@ async function main() {
 
         dompopupContainer.classList.remove("hidden");
         const onClosePopup = () => {
+            document.onkeyup = null;
             dompopupContainer.children[0].remove();
             dompopupContainer.append(domSpinner);
             dompopupContainer.classList.add('hidden');
-        }
+        };
 
         const TaskPopup = (await import('./src/mvs/view/popup/TaskPopup')).default;
         const taskPopupInstance = new TaskPopup(
@@ -151,10 +149,9 @@ async function main() {
             };
             dompopupContainer.append(taskPopupInstance.render());
         });
+        console.log('render.0')
     }
 
-
-    console.log('render.0')
 
     function saveTask() {
         localStorage.setItem(KEY_LOCAL_TASKS, JSON.stringify(tasks));
