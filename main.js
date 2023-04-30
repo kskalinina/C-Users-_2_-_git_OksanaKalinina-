@@ -10,13 +10,13 @@ const KEY_LOCAL_TASKS = 'tasks';
 const Tags = ["Web", "Update", "Design", "Content"]
 class TaskVO {
     static fromJSON(json) {
-        return new TaskVO(json.id, json.title, json.date, json.tag );
+        return new TaskVO(json.id, json.title, json.date, json.tags );
     }
-    constructor(id, title, date, tag) {
+    constructor(id, title, date, tags) {
         this.id= id;
         this.title = title;
         this.date = date;
-        this.tag = tag;
+        this.tag = tags;
     }
 }
 const getDOM = (id) => document.getElementById(id);
