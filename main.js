@@ -8,6 +8,7 @@ import dom from "./src/constants/dom.js";
 import TaskModel from "./src/mvs/model/TaskModel.js";
 import TaskVO from "./src/mvs/model/vo/TaskVO.js";
 import TasksController from "./src/mvs/controller/TasksController.js";
+import NetworkService from "./src/service/NetworkService.js";
 
 
 
@@ -21,8 +22,9 @@ const QUERY = (container, id) => container.querySelector(`[data-id="${id}"]`);
 const domTemplateTask = getDOM(Dom.Template.TASK);
 const domTaskColumn= domTemplateTask.parentNode;
 
+const networkService = new NetworkService('http://localhost:3000');
 const taskModel = new TaskModel();
-const tasksController = new TasksController(taskModel);
+const tasksController = new TasksController(taskModel, networkService);
 
 domTemplateTask.removeAttribute('id');
 domTemplateTask.remove();
@@ -49,12 +51,12 @@ async function main() {
         tasks.forEach((taskVO) => renderTask(taskVO));
     });
     tasksController.retrieveTasks()
-      .then(() => {          })
+      .then(() => {
+      })
       .catch((e) => {});
 
     const taskOperations = {
         [Dom.Button.CREATE_TASK]: () => {
-
                     renderTaskPopup(
                         null,
                         'Create task',
@@ -90,17 +92,18 @@ async function main() {
                 }
             );
         },
-        [Dom.Template.Task.BTN_EDIT]: (taskVO, domTask) => {
+        [Dom.Template.Task.BTN_EDIT]: (taskId) => {
+          const taskVO = taskModel.getTaskbyId(taskId)
             renderTaskPopup(taskVO, 'Update task', 'Update', (taskTitle, taskDate, taskTag) => {
                     console.log('> Update task -> On Confirm', {
                         taskTitle,
                         taskDate,
                         taskTag,
                     });
-                    taskVO.title = taskTitle;
-                    const domTaskUpDated = renderTask(taskVO);
-                    domTaskColumn.replaceChild(domTaskUpDated, domTask);
-                    saveTask();
+                    tasksController.updateById(taskId, taskTitle,
+                      taskDate,
+                      taskTag)
+
                 }
             );
         },
