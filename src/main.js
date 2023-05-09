@@ -1,5 +1,9 @@
-import { createApp } from 'vue'
-import './style.css'
-import App from './App.vue'
+// eslint-disable-next-line
+import { createApp } from 'vue';
+// eslint-disable-next-line quotes
+import './style.css';
+// eslint-disable-next-line
+import App from './App.vue';
 
-createApp(App).mount('#app')
+// eslint-disable-next-line
+createApp(App).mount('#app');
