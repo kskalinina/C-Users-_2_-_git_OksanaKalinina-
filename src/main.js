@@ -3,7 +3,7 @@ import { createApp } from 'vue';
 // eslint-disable-next-line quotes
 import './style.css';
 // eslint-disable-next-line
-import App from './App.vue';
+import AppComposition from './AppComposition.vue';
 
 // eslint-disable-next-line
-createApp(App).mount('#app');
+createApp(AppComposition).mount('#app');
