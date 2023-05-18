@@ -5,112 +5,67 @@ import AppHeader from "./components/AppHeader.vue";
 const LOCAL_KEY_TODOS = "todos";
 const LOCAL_KEY_INPUT_TEXT = "input_text";
 
-const  inputText = ref(JSON.parse(localStorage.getItem(LOCAL_KEY_INPUT_TEXT) ||"" ));
-const  todos = ref(JSON.parse(localStorage.getItem(LOCAL_KEY_TODOS)  || "[]"));
+
+const parseLocalStorageWithDefaultValue = (key,alt) => JSON.parse(localStorage.getItem(key) || JSON.stringify(alt));
+
+const user = ref({name:"Oksana"});
+const  inputText = ref(parseLocalStorageWithDefaultValue(LOCAL_KEY_INPUT_TEXT,"" ));
+const  todos = ref(parseLocalStorageWithDefaultValue(LOCAL_KEY_TODOS, "[]"));
 const canAddItemToTheList =computed( () => true);
-const todoText =computed( () => inputText.value?.trim());
+const getTodoCount =computed( () => todos.value?.length);
+const getTodoText =computed( () => inputText.value?.trim());
 
 
 const  onInputEnterKeyUp = ()  => {
-    console.log("App->onInputEnterKeyUp:",todoText.value);
-  //  this.todos.push(this.todoText);
-  //  this.inputText = " ";
+    console.log("App->onInputEnterKeyUp:",getTodoText.value);
+   todos.value.push(getTodoText.value);
+  inputText.value = " ";
   };
 
+const onDeleteTodo = (index) => {
+  console.log("->App-onDeleteTodo: index",index);
+  todos.value.splice(index, 1);
+};
 
-watch(inputText, (value) => {
-  console.log("App -> watch: inputText", value);
-  localStorage.setItem(LOCAL_KEY_INPUT_TEXT, JSON.stringify(value));
-});
+const saveLocalStorage = (key,value) => {
+  console.log(">saveLocalStorage=", value);
+  localStorage.setItem(key, JSON.stringify(value));
+};
+watch(inputText, (v) => saveLocalStorage(LOCAL_KEY_INPUT_TEXT,v));
+watch(todos, (v) => saveLocalStorage(LOCAL_KEY_TODOS, v),{deep:true});
+
 onMounted( () => {
   console.log(">-App ->onMounted");
 });
 </script>
 
 <template>
-  <!--  <AppHeader>-->
-  <!--    <font color="red">-->
-  <!--      Todo App-->
-  <!--    </font>-->
-  <!--    <template #sub-header>-->
-  <!--      <span v-if="user">created by {{ user.name }}</span>-->
-  <!--      <span v-else> noname</span>-->
-  <!--    </template>-->
-  <!--  </AppHeader>-->
+  <AppHeader>
+    <font color="red">
+      Todo App
+    </font>
+    <template #sub-header>
+      <span v-if="user">created by {{ user.name }}</span>
+      <span v-else> noname</span>
+    </template>
+  </AppHeader>
   <input
     ref="domInput"
     v-model="inputText"
     @keyup.enter="canAddItemToTheList && onInputEnterKeyUp()"
   >
 
-<!--  <div>-->
-<!--    List: <span v-if="todos.length">{{ getTodoCount }}</span>-->
-<!--    <span v-else>empty </span>-->
-<!--    <TodoItem-->
-<!--      v-for="(item,index) in todos"-->
-<!--      :key="item"-->
-<!--      :index="index +1"-->
-<!--      :text="item"-->
-<!--      @delete="onDeleteTodo(index)"-->
-<!--    />-->
-<!--  </div>-->
+  <div>
+    List: <span v-if="todos.length">{{ getTodoCount }}</span>
+    <span v-else>empty </span>
+    <TodoItem
+      v-for="(item,index) in todos"
+      :key="item"
+      :index="index +1"
+      :text="item"
+      @delete="onDeleteTodo(index)"
+    />
+  </div>
 </template>
-<script>
-// import TodoItem from "./components/TodoItem.vue";
-//
-// const LOCAL_KEY_TODOS = "todos";
-// const LOCAL_KEY_INPUT_TEXT = "input_text";
-// let todoStopWatch;
-// export default {
-//     components: {AppHeader,TodoItem},
-//   data: () => ({
-//     inputText: null,
-//     todos: [],
-//     user: {name: "Oksana"}
-//   }),
-//   computed: {
-//     canAddItemToTheList() {
-//       return this.todoText?.length > 0;
-//     },
-//     getTodoCount () {
-//       return this.todos.length>3 ? "many": this.todos.length;
-//     },
-//     todoText() {
-//       return this.inputText?.trim(); }
-//     },
-//   created() {
-//     const rawTodos =localStorage.getItem(LOCAL_KEY_TODOS);
-//     console.log("App - > created: rawTodos", rawTodos);
-//     if (rawTodos) {
-//       this.todos = JSON.parse(rawTodos);
-//     }
-//     this.inputText= JSON.parse(localStorage.getItem(LOCAL_KEY_INPUT_TEXT) || "");
-//     todoStopWatch=this.$watch(() => this.todos, (value) => {
-//       console.log("App -> watch: todos", value);
-//       localStorage.setItem(LOCAL_KEY_TODOS, JSON.stringify(value));
-//     }, { deep: true });
-//     this.$watch(() => this.inputText, (value) => {
-//       console.log("App -> watch: inputText", value);
-//       localStorage.setItem(LOCAL_KEY_INPUT_TEXT, JSON.stringify(value));
-//     });
-//   },
-//   unmounted() {
-//     todoStopWatch();
-//   },
-//   mounted() {
-//     console.log(">App - > mounted",{dom: this.$refs.domInput});
-//   },
-//   methods: {
-//
-//   onInputEnterKeyUp() {
-//     console.log("->App-onInputEnterKeyUp",this.todoText);
-//     this.todos.push(this.todoText);
-//     this.inputText = " ";
-//   },
-//   onDeleteTodo(index) {
-//     console.log("->App-onDeleteTodo: index",index);
-//     this.todos.splice(index, 1);
-//   },
-// }
-// };
-</script>
+
+
