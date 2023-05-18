@@ -2,7 +2,6 @@
 import { onMounted, ref } from "vue";
 import AppHeader from "./components/AppHeader.vue";
 
-const  PAGES = ["index","todos"];
 const user = ref({name:"Oksana"});
 
 onMounted( () => {
