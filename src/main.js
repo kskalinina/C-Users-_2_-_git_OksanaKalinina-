@@ -1,20 +1,12 @@
-// eslint-disable-next-line
-import { createApp } from 'vue';
-// eslint-disable-next-line quotes
-import './style.css';
-import { createRouter, createWebHashHistory} from "vue-router";
-// eslint-disable-next-line
-import AppComposition from './AppComposition.vue';
-import TodosPage from "./components/TodosPage.vue";
-import IndexPage from "./components/IndexPage.vue";
-import router from "./router.js";
+import { createApp } from "vue";
+import "./style.css";
 import { createPinia } from "pinia";
+import piniaPluginPersistedState from "pinia-plugin-persistedstate";
 
-
-
-// eslint-disable-next-line
+import AppComposition from "./AppComposition.vue";
+import router from "./router.js";
 
 createApp(AppComposition)
-  .use(createPinia())
-  .use(router)
+    .use(createPinia().use(piniaPluginPersistedState))
+    .use(router)
   .mount("#app");
