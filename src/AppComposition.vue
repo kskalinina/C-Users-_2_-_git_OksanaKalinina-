@@ -12,7 +12,7 @@ onMounted( () => {
 });
 </script>
 <template>
-  <AppHeader>
+  <AppHeader ref="header">
     Todo App
     <template #sub-header>
       <span v-if="hasUser">created by {{ user.name }}</span>
