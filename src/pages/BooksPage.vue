@@ -1,65 +1,143 @@
 <script setup>
-import { computed, ref, watch } from "vue";
-import TodoItem from "@/components/TodoItem.vue";
-import { parseLocalStorageWithDefaultValue, saveLocalStorage } from "@/utils/storyutils.js";
-import {  useTodosStore } from "@/store/todosStore.js";
-import { storeToRefs } from "pinia";
+import {inject, onMounted, ref} from "vue";
+import PROVIDE from "@/constans/PROVICE_PB.js";
+import { useRouter} from "vue-router";
 
+const router = useRouter();
 
-const LOCAL_KEY_INPUT_TEXT = "input_text";
+const domInputFile= ref(null);
+const domBtnUpload= ref(null);
 
+const isUploading = ref (false);
+const isReady = ref (false);
+const isBooksLoading = ref (false);
 
-const  inputText = ref(parseLocalStorageWithDefaultValue(LOCAL_KEY_INPUT_TEXT,"" ));
-const  todoStore = useTodosStore();
-const { todos, getTodoCount } = storeToRefs(todoStore);
+const books = ref([]);
+const pageIndex = ref(parseInt(router.currentRoute.value.query.page) || 1);
+const pagesMax = ref(0);
 
-const canAddItemToTheList =computed( () => true);
+const pb= inject(PROVIDE.PB);
+const booksCollection = pb.collection("books");
 
-const getTodoText =computed( () => inputText.value?.trim());
-
-
-const  onInputEnterKeyUp = ()  => {
-  console.log("TodosPage->onInputEnterKeyUp:",getTodoText.value);
-  todoStore.createTodo(getTodoText.value);
-  inputText.value = " ";
+const loadBooks = async () => {
+  isBooksLoading.value = true;
+  return booksCollection.getList(pageIndex.value, 10).then((result) => {
+    console.log("booksCollection", result);
+    pagesMax.value = result.totalPages;
+    books.value= result.items;
+    isBooksLoading.value = false;
+  });
 };
 
-const onDeleteTodo = (index) => {
-  console.log("->TodosPage-onDeleteTodo: index",index);
-  todoStore.deleteTodoByIndex(index);
+const insertBooks = async (booksList) => {
+  const result = [];
+  for await(const booksListElement of booksList) {
+    await booksCollection.create(booksListElement).then((record) => {
+      console.log("> \t record created", record);
+      result.push(record);
+    }).catch((e) => console.log(e));
+  }
+  return result;
 };
 
-watch(inputText, (v) => saveLocalStorage(LOCAL_KEY_INPUT_TEXT,v));
 
+const  onUploadClick = ()  => {
+  console.log("BooksPage->onUploadClick:",domInputFile.value);
+  const setActiveforUploadUI = (value, negativeValue= !value) => {
+    domBtnUpload.value.disabled = negativeValue;
+    domInputFile.value.disabled = negativeValue;
+    isUploading.value = negativeValue;
+  };
+  domInputFile.value.oninput =() => {
+    const fileList = domInputFile.value.files;
+    const selectedFile = fileList[0];
+    const reader = new FileReader();
+    console.log(">files",fileList);
+    console.log("selectedFile:", selectedFile);
+    setActiveforUploadUI(false);
+
+    reader.onload = async () => {
+      const booksRaw = JSON.parse(reader.result.toString());
+      console.log("selectedFile:", booksRaw);
+      try {
+        const booksInserted= await insertBooks(booksRaw);
+        console.log("inserted;",booksInserted);
+        books.value =booksInserted;
+
+      } catch (e) {
+        console.log(e);
+      }
+      setActiveforUploadUI(true);
+      reader.onload = null;
+      domInputFile.value.oninput= null;
+    };
+    reader.readAsText(selectedFile);
+  };
+  domInputFile.value.click();
+};
+const onChangePage =(delta) => {
+  console.log(">BooksPage -> onChangePage", {delta});
+  pageIndex.value += delta;
+  loadBooks().then(() => {
+    router.replace({
+      query: {page: pageIndex.value} });
+  });
+};
+onMounted(() => {
+  Promise.all([
+    loadBooks()
+  ]).then(()=>{
+    isReady.value=true;
+  });
+});
 </script>
 <template>
-  <input
-    ref="domInput"
-    v-model="inputText"
-    @keyup.enter="canAddItemToTheList && onInputEnterKeyUp()"
-  >
-
-  <div>
-    List: <span v-if="todos.length">{{ getTodoCount }}</span>
-    <span v-else>empty </span>
-    <template
-      v-for="(item,index) in todos"
-      :key="item"
-    >
-      <TodoItem
-        :index="index +1"
-        :text="item"
-        @delete="onDeleteTodo(index)"
-      />
-    </template>
+  <div v-if="!isReady">
+    Page Loading
+  </div>
+  <div v-else>
+    <div v-if="books.length > 0">
+      <button
+        :disabled="pageIndex === 1"
+        @click="onChangePage(-1)"
+      >
+        Prev
+      </button>
+      <button
+        :disabled="pageIndex === pagesMax"
+        @click="onChangePage(1)"
+      >
+        Next
+      </button>
+      <div>
+        <b> Books: ({{ pageIndex }}/{{ pagesMax }})</b>
+        <div
+          v-for="book in books"
+          :key="book.id"
+        >
+          {{ book.title }}
+        </div>
+      </div>
+    </div>
+    <div v-else>
+      <input
+        ref="domInputFile"
+        hidden
+        type="file"
+        accept=".json"
+      >
+      <button
+        ref="domBtnUpload"
+        @click="onUploadClick"
+      >
+        Upload
+      </button>
+      <div v-if="isUploading">
+        In progess, wait please ...
+      </div>
+    </div>
   </div>
 </template>
-
-<script>
-export default {
-  name: "TodosPage"
-};
-</script>
 
 <style scoped>
 

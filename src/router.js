@@ -2,7 +2,7 @@ import { createRouter, createWebHashHistory } from "vue-router";
 import IndexPage from "./pages/IndexPage.vue";
 import TodosPage from "./pages/todos/TodosPage.vue";
 import { useUserStore } from "./store/userStore.js";
-import ROUTES from "./constans/routes.js";
+import ROUTES, {PUBLIC_PAGES} from "./constans/routes.js";
 import {inject} from "vue";
 import PROVIDE from "@/constans/PROVICE_PB.js";
 
@@ -22,21 +22,37 @@ const router = createRouter({
       component: () => import("./pages/todos/TodoEditPage.vue")
     },
     {
-      name: "Signin",
       path:ROUTES.SIGNIN,
-      component: () => import("./pages/SigninPage.vue")
+      component: () => import("./pages/SignInPage.vue")
+    },
+    {
+      path:ROUTES.SIGNUP,
+      component: () => import("./pages/SignUpPage.vue")
+    },
+    {
+      path:ROUTES.BOOKS,
+      component: () => import("./pages/BooksPage.vue")
     }
   ],
 });
 router.beforeEach((to,from, next) => {
   const pb = inject(PROVIDE.PB);
-  const publicPages = [ROUTES.INDEX, ROUTES.SIGNIN];
-  const notAllowedNavigation =
-        publicPages.indexOf(to.path) < 0
-        && !pb.authStore.isValid;
-  console.log("> router -> beforeEach", to.path,{notAllowedNavigation});
-  if (notAllowedNavigation) next({path: ROUTES.SIGNIN});
-  else next();
-});
+  const userLoggedId = pb.authStore.model?.id;
 
+  if (userLoggedId) {
+    checkNavigation([ROUTES.SIGNUP], to.path,from,next, true);
+  }else {
+    checkNavigation([PUBLIC_PAGES], to.path,{path: ROUTES.SIGNIN},next );
+  }
+});
+function checkNavigation(routes, path, gotoRoute, next, isPathIncluded= false) {
+  const pathIndex= routes.indexOf(path);
+  const notAllowedNavigation = isPathIncluded?
+    pathIndex >-1 : pathIndex < 0;
+  console.log("> router -> beforeEach", path, {notAllowedNavigation});
+  if (notAllowedNavigation) {
+    next(gotoRoute);
+  }else
+    next();
+}
 export default router;
