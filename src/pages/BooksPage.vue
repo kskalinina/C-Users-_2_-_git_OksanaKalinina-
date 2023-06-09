@@ -17,28 +17,36 @@ const pageIndex = ref(parseInt(router.currentRoute.value.query.page) || 1);
 const pagesMax = ref(0);
 
 const pb= inject(PROVIDE.PB);
+const db= inject(PROVIDE.DB);
 const booksCollection = pb.collection("books");
+const BOOKS_ITEMS_PER_PAGE= 10;
 
 const loadBooks = async () => {
   isBooksLoading.value = true;
-  return booksCollection.getList(pageIndex.value, 10).then((result) => {
-    console.log("booksCollection", result);
-    pagesMax.value = result.totalPages;
-    books.value= result.items;
-    isBooksLoading.value = false;
-  });
+   return db.allDocs({include_docs: true, limit:BOOKS_ITEMS_PER_PAGE, skip:(pageIndex.value -1)*BOOKS_ITEMS_PER_PAGE}).then((result) => {
+    console.log(">Bookspage -> loadbooks:=", result);
+      pagesMax.value = Math.ceil(result.total_rows/BOOKS_ITEMS_PER_PAGE);
+      books.value= result.rows.map(item => item.doc);
+      isBooksLoading.value = false;
+  }).catch((e) => {
+     console.log(">Bookspage -> loadbooks:err", e);
+   });
+  // return booksCollection.getList(pageIndex.value, BOOKS_ITEMS_PER_PAGE).then((result) => {
+  //   console.log("booksCollection", result);
+  //   pagesMax.value = result.totalPages;
+  //   books.value= result.items;
+  //   isBooksLoading.value = false;
+  // });
 };
 
 const insertBooks = async (booksList) => {
   const result = [];
-  for await(const booksListElement of booksList) {
-    await booksCollection.create(booksListElement).then((record) => {
-      console.log("> \t record created", record);
-      result.push(record);
-    }).catch((e) => console.log(e));
-  }
-  return result;
-};
+  return db.bulkDocs(booksList, {include_docs:true}).then((results) => {
+    console.log("insertBooks -> result:", result);
+      }).catch(e => {
+    console.log("insertBooks -> e:", e);
+  });
+    };
 
 
 const  onUploadClick = ()  => {
@@ -60,16 +68,14 @@ const  onUploadClick = ()  => {
       const booksRaw = JSON.parse(reader.result.toString());
       console.log("selectedFile:", booksRaw);
       try {
-        const booksInserted= await insertBooks(booksRaw);
-        console.log("inserted;",booksInserted);
-        books.value =booksInserted;
-
+         await insertBooks(booksRaw);
       } catch (e) {
         console.log(e);
       }
       setActiveforUploadUI(true);
       reader.onload = null;
       domInputFile.value.oninput= null;
+      await loadBooks();
     };
     reader.readAsText(selectedFile);
   };
