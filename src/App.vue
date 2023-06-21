@@ -5,6 +5,8 @@ import PROVIDE from "@/constans/PROVICE_PB.js";
 import ROUTES from "@/constans/routes.js";
 import {useRoute} from "vue-router";
 import AppMenu from "@/components/AppMenu.vue";
+import {useQuery} from "@vue/apollo-composable";
+import gql from "graphql-tag";
 
 const pb = inject(PROVIDE.PB);
 const user = ref(pb.authStore.model);
@@ -13,6 +15,14 @@ pb.authStore.onChange(() => {
   user.value=pb.authStore.model;
 });
 const hasUser =computed(() => !!user.value);
+const { result:usersData, loading:isUserLoading } = useQuery(gql`
+  query getUsers {
+    user {
+      id
+      name
+    }
+  }
+`);
 
 const checkRouteIsNotCurrent = (routePath) => useRoute().path !== routePath;
 
@@ -31,8 +41,14 @@ const menuLinks = reactive([
 
 </script>
 <template>
-  <AppHeader ref="header">
+  <AppHeader>
     Todo App
+    <div v-if="isUserLoading">
+      Users Loading
+    </div>
+    <div v-else>
+      {{ usersData}}
+    </div>
     <template #sub-header>
       <span v-if="hasUser">created by {{ user.username }}</span>
       <span v-else> noname</span>
@@ -42,7 +58,8 @@ const menuLinks = reactive([
     style="margin: 2rem 0;"
     :links="menuLinks"
   />
-  <router-view />
+      <router-view />
+    
 </template>
 
 
