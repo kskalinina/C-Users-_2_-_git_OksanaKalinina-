@@ -1,18 +1,16 @@
-<script setup>
+<script setup lang="ts">
 import RegistrationForm from "@/components/RegistrationForm.vue";
 import ROUTES from "@/constans/routes.js";
-import PROVIDE from "@/constans/PROVICE_PB.js";
-import {inject, ref} from "vue";
+import {ref} from "vue";
 
-const pb = inject(PROVIDE.PB);
 const isSuccess = ref(false);
 const onLogin = (dto) => {
-  pb.collection("users").authWithPassword(
-    dto.username,
-    dto.password,
-  ).then(() => {
-    isSuccess.value = true;
-  });
+  // pb.collection("users").authWithPassword(
+  //   dto.username,
+  //   dto.password,
+  // ).then(() => {
+  //   isSuccess.value = true;
+  // });
 };
 </script>
 <template>

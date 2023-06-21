@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import ROUTES from "@/constans/routes.js";
 import {inject, ref} from "vue";
 import PROVIDE from "@/constans/PROVICE_PB.js";

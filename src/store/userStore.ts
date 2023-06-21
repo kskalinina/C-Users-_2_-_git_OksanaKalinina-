@@ -1,10 +1,14 @@
+import { IUser } from "@/interface";
 import { defineStore } from "pinia";
 
+interface IUserState {
+  user?: IUser
+}
 export const useUserStore = defineStore("user",  {
-  state: () => ({ user: {name: "Oksana"}, }),
+  state: (): IUserState => ({  }),
   getters: {
 
-    hasUser: (state) => !!state.user.name,
+    hasUser: (state): boolean => !!state.user?.name,
 
   },
   actions: {

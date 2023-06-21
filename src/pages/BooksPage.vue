@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import {inject, onMounted, ref} from "vue";
 import PROVIDE from "@/constans/PROVICE_PB.js";
 import { useRouter} from "vue-router";
