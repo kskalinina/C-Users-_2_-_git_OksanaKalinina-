@@ -2,15 +2,25 @@
 import RegistrationForm from "@/components/RegistrationForm.vue";
 import ROUTES from "@/constans/routes.js";
 import {ref} from "vue";
+import {useLazyQuery} from "@vue/apollo-composable";
+import gql from "graphql-tag";
+import {useUserStore} from "@/store/userStore";
 
 const isSuccess = ref(false);
-const onLogin = (dto) => {
-  // pb.collection("users").authWithPassword(
-  //   dto.username,
-  //   dto.password,
-  // ).then(() => {
-  //   isSuccess.value = true;
-  // });
+const userStore = useUserStore ();
+
+onResult((result) => {
+  console.log("result", result);
+  isSuccess.value = result.data.user?.length === 1;
+  if (isSuccess.value) {
+    userStore.setupUser(result.data.user[0]);
+  }
+  });
+  onError((error) => {
+    console.log(error);
+  });
+const onLogin = (dto: any) => {
+load(null, dto);
 };
 </script>
 <template>

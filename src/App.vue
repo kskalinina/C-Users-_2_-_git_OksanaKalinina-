@@ -11,7 +11,7 @@ import {storeToRefs} from "pinia";
 
 const userStore = useUserStore();
 const { user, hasUser } = storeToRefs(userStore);
-const { result:usersData, loading:isUserLoading } = useQuery(gql`
+const { result:usersData, loading:isUserLoading , error:errorUserLoading} = useQuery(gql`
   query getUsers {
     user {
       id
@@ -42,8 +42,11 @@ const menuLinks = reactive([
     <div v-if="isUserLoading">
       Users Loading
     </div>
-    <div v-else>
-      {{ usersData}}
+    <div v-else-if="usersData">
+      {{ usersData.user}}
+    </div>
+    <div v-else-if="errorUserLoading">
+      Error loading user: {{errorUserLoading}}
     </div>
     <template #sub-header>
       <span v-if="hasUser">created by {{ user.name }}</span>
