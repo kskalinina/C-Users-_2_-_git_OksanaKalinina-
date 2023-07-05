@@ -11,12 +11,8 @@ const router = createRouter({
       component: ()=>  import("./pages/IndexPage.vue")
     },
     {
-      path:ROUTES.TODOS,
-      component: () => import("./pages/todos/TodosPage.vue")
-    },
-    {
-      path:ROUTES.TODOS_ID,
-      component: () => import("./pages/todos/TodoEditPage.vue")
+      path:ROUTES.SELECTED_BOOK,
+      component: () => import("./pages/SelectedBookPage.vue")
     },
     {
       path:ROUTES.SIGNIN,

@@ -3,7 +3,8 @@ import { ApolloClient, createHttpLink, InMemoryCache } from "@apollo/client/core
 // HTTP connection to the API
 const httpLink = createHttpLink({
     // You should use an absolute URL here
-    uri: "http://localhost:8080/v1/graphql",
+    uri: import.meta.env.VITE_GRAPHQL_END_POINT,
+    headers: {"x-hasura-admin-secret": import.meta.env.VITE_GRAPHQL_ADNIN_SECRET}
 });
 
 // Cache implementation

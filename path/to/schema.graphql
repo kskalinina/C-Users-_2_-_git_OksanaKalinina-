@@ -368,7 +368,7 @@ type query_root {
     "fetch data from the table: \"book\" using primary key columns"
     book_by_pk(id: uuid!): book
     "fetch data from the table: \"user\""
-    user(
+    users(
         "distinct select on columns"
         distinct_on: [user_select_column!],
         "limit the number of rows returned"

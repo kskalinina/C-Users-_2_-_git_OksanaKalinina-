@@ -1,14 +1,8 @@
-import { IUser } from "@/interface";
 import { defineStore } from "pinia";
-import {provideApolloClient, useMutation} from "@vue/apollo-composable";
+import {provideApolloClient, useLazyQuery, useMutation, useQuery} from "@vue/apollo-composable";
 import gql from "graphql-tag";
 import apolloClient from "@/apollo";
 
-
-
-interface IUserState {
-  user?: IUser
-}
 const { mutate: insertCommentToBook } = provideApolloClient(apolloClient)(() => useMutation(gql`
   mutation InsertComments($user_id: uuid!, $books_id: Int, $comment: String) {
     insert_comments(objects: {user_id: $user_id, books_id: $books_id, comment: $comment}) {
@@ -25,26 +19,48 @@ const { mutate: insertCommentToBook } = provideApolloClient(apolloClient)(() => 
   }
 `));
 
+const queryBookDetailsWithCommentsById = provideApolloClient(apolloClient)(() => useLazyQuery(gql `
+  query GetBook($id: Int!){
+    books_by_pk(id: $id) {
+      country
+      language
+      pages
+      title
+      year
+      imageLink
+      comments {
+        comment
+        id
+        user {
+          name
+        }
+      }
+    }
+  }
+`));
 
 
-export const useUserStore = defineStore("user", {
-  state: (): IUserState =>  ({ user: undefined }),
-  getters: {
-    hasUser: (state): boolean => !!state.user?.name,
-    userId: (state): string => state.user!.id,
-    // getTodosCount: (state) => state.todos.length,
-  },
+export const useBookStore = defineStore("books", {
+  state: (): any => ({selectedBook: undefined, isSelectedBookLoading: true}),
   actions: {
-    setupUser(user:IUser) {
-      console.log("> userStore -> setupUser:", {user});
-      this.user =user;
+    async loadBookDetailsWithCommentsById(id: string) {
+      return new Promise((resolve) => {
+        queryBookDetailsWithCommentsById.onResult((result) => {
+          if(!result.loading) {
+            this.selectedBook = result.data.books_by_pk;
+            this.isSelectedBookLoading = false;
+            resolve(result.data.books_by_pk);
+                      }
+        });
+        queryBookDetailsWithCommentsById.load(null,{id});
+      });
     },
-    async insertCommentToBook(bookId: number, comment:string) {
-      console.log(">userStore ->insertCommentToBook: ", {bookId, comment});
-      return insertCommentToBook({books_id: bookId, user_id: this.userId, comment});
+    async insertCommentToBookFromUser(books_id: number, user_id: string, comment:string) {
+      console.log(">userStore ->insertCommentToBook: ", {books_id, comment});
+      return insertCommentToBook({books_id, user_id, comment});
     }
   },
-  persist: true
+  persist: false
 });
 
 

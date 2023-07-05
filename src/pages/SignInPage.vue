@@ -9,7 +9,7 @@ import {useUserStore} from "@/store/userStore";
 const isSuccess = ref(false);
 const userStore = useUserStore ();
 const { load, onResult, onError } = useLazyQuery(gql `query GetUserWithCredentials($username: String!, $password: String!) {
-      user(where: {name: {_eq: $username}, password: {_eq: $password}}) {
+      users (where: {name: {_eq: $username}, password: {_eq: $password}}) {
         name
         password
         id
@@ -18,9 +18,10 @@ const { load, onResult, onError } = useLazyQuery(gql `query GetUserWithCredentia
 );
 onResult((result) => {
   console.log("result", result);
-  isSuccess.value = result.data.user?.length === 1;
+  const usersData = result.data?.users;
+  isSuccess.value = usersData?.length === 1;
   if (isSuccess.value) {
-    userStore.setupUser(result.data.user[0]);
+    userStore.setupUser(usersData[0]);
   }
   });
   onError((error) => {

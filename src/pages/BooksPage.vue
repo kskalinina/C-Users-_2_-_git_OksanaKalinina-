@@ -2,6 +2,8 @@
 import {inject, onMounted, ref} from "vue";
 import PROVIDE from "@/constans/PROVICE_PB.js";
 import { useRouter} from "vue-router";
+import {DefaultApolloClient, useLazyQuery} from "@vue/apollo-composable";
+import gql from "graphql-tag";
 
 const router = useRouter();
 
@@ -10,78 +12,54 @@ const domBtnUpload= ref(null);
 
 const isUploading = ref (false);
 const isReady = ref (false);
-const isBooksLoading = ref (false);
+//const isBooksLoading = ref (false);
 
+const apollo = inject(DefaultApolloClient);
+console.log((apollo as any).link);
+
+const BOOKS_ITEMS_PER_PAGE = 10;
 const books = ref([]);
-const pageIndex = ref(parseInt(router.currentRoute.value.query.page) || 1);
+const routerQueryPage: string = router.currentRoute.value.query.page?.toString() || " ";
+const pageIndex = ref(parseInt(routerQueryPage) || 1);
 const pagesMax = ref(0);
-
-const pb= inject(PROVIDE.PB);
-const db= inject(PROVIDE.DB);
-const booksCollection = pb.collection("books");
-const BOOKS_ITEMS_PER_PAGE= 10;
-
+const { load, onResult, loading: isBooksLoading } = useLazyQuery(gql `query MyQuery($limit: Int!, $offset: Int!) {
+  books(limit: $limit, offset: $offset) {
+    id
+    country
+    imageLink
+    language
+    pages
+    title
+    year
+  }
+  books_aggregate {
+    aggregate {
+      count
+    }
+  }
+}`
+);
+onResult((result) => {
+  console.log(result);
+  if (!result.loading) {
+    const {data} = result;
+    books.value =data.books.map((i:any) => i);
+    pagesMax.value = data.books_aggregate.aggregate.count;
+  }
+});
 const loadBooks = async () => {
   isBooksLoading.value = true;
-   return db.allDocs({include_docs: true, limit:BOOKS_ITEMS_PER_PAGE, skip:(pageIndex.value -1)*BOOKS_ITEMS_PER_PAGE}).then((result) => {
-    console.log(">Bookspage -> loadbooks:=", result);
-      pagesMax.value = Math.ceil(result.total_rows/BOOKS_ITEMS_PER_PAGE);
-      books.value= result.rows.map(item => item.doc);
-      isBooksLoading.value = false;
-  }).catch((e) => {
-     console.log(">Bookspage -> loadbooks:err", e);
-   });
-  // return booksCollection.getList(pageIndex.value, BOOKS_ITEMS_PER_PAGE).then((result) => {
-  //   console.log("booksCollection", result);
-  //   pagesMax.value = result.totalPages;
-  //   books.value= result.items;
-  //   isBooksLoading.value = false;
-  // });
+  load(null, {
+    limit: BOOKS_ITEMS_PER_PAGE,
+    offset: (pageIndex.value - 1)
+        * BOOKS_ITEMS_PER_PAGE
+  }, {context: {
+    headers: {
+      "X-Hasura-Role": "user"
+    }
+    }});
 };
-
-const insertBooks = async (booksList) => {
-  const result = [];
-  return db.bulkDocs(booksList, {include_docs:true}).then((results) => {
-    console.log("insertBooks -> result:", result);
-      }).catch(e => {
-    console.log("insertBooks -> e:", e);
-  });
-    };
-
-
-const  onUploadClick = ()  => {
-  console.log("BooksPage->onUploadClick:",domInputFile.value);
-  const setActiveforUploadUI = (value, negativeValue= !value) => {
-    domBtnUpload.value.disabled = negativeValue;
-    domInputFile.value.disabled = negativeValue;
-    isUploading.value = negativeValue;
-  };
-  domInputFile.value.oninput =() => {
-    const fileList = domInputFile.value.files;
-    const selectedFile = fileList[0];
-    const reader = new FileReader();
-    console.log(">files",fileList);
-    console.log("selectedFile:", selectedFile);
-    setActiveforUploadUI(false);
-
-    reader.onload = async () => {
-      const booksRaw = JSON.parse(reader.result.toString());
-      console.log("selectedFile:", booksRaw);
-      try {
-         await insertBooks(booksRaw);
-      } catch (e) {
-        console.log(e);
-      }
-      setActiveforUploadUI(true);
-      reader.onload = null;
-      domInputFile.value.oninput= null;
-      await loadBooks();
-    };
-    reader.readAsText(selectedFile);
-  };
-  domInputFile.value.click();
-};
-const onChangePage =(delta) => {
+const onChangePage =(delta: number) => {
   console.log(">BooksPage -> onChangePage", {delta});
   pageIndex.value += delta;
   loadBooks().then(() => {
@@ -99,49 +77,63 @@ onMounted(() => {
 </script>
 <template>
   <div v-if="!isReady">
-    Page Loading
+    Books page Loading
   </div>
   <div v-else>
     <div v-if="books.length > 0">
-      <button
-        :disabled="pageIndex === 1"
-        @click="onChangePage(-1)"
+      <v-btn-group
+          border="10"
+          density="compact"
       >
-        Prev
-      </button>
-      <button
-        :disabled="pageIndex === pagesMax"
-        @click="onChangePage(1)"
-      >
-        Next
-      </button>
-      <div>
-        <b> Books: ({{ pageIndex }}/{{ pagesMax }})</b>
-        <div
-          v-for="book in books"
-          :key="book.id"
+        <v-btn
+            :disabled="pageIndex === 1 || isBooksLoading"
+            @click="onChangePage(-1)"
         >
-          {{ book.title }}
-        </div>
+          Prev
+        </v-btn>
+        <v-btn
+            :disabled="pageIndex === pagesMax || isBooksLoading"
+            @click="onChangePage(1)"
+        >
+          Next
+        </v-btn>
+      </v-btn-group>
+      <div>
+        <b> Books ({{ pageIndex }}/{{ pagesMax }}):</b>
+        <div v-if="isBooksLoading">Books Loading </div>
+        <v-list v-else
+                class="text-left"
+        >
+          <v-list-item
+              v-for="book in books"
+              :key="book.id"
+              :title="book.title"
+              base-color="blue"
+              rounded="xl"
+              class="ma-10"
+              :to="`/books/${book.id}`"
+          >
+           </v-list-item>
+        </v-list>
       </div>
     </div>
-    <div v-else>
-      <input
-        ref="domInputFile"
-        hidden
-        type="file"
-        accept=".json"
-      >
-      <button
-        ref="domBtnUpload"
-        @click="onUploadClick"
-      >
-        Upload
-      </button>
-      <div v-if="isUploading">
-        In progess, wait please ...
-      </div>
-    </div>
+<!--    <div v-else>-->
+<!--      <input-->
+<!--        ref="domInputFile"-->
+<!--        hidden-->
+<!--        type="file"-->
+<!--        accept=".json"-->
+<!--      >-->
+<!--      <button-->
+<!--        ref="domBtnUpload"-->
+<!--        @click="onUploadClick"-->
+<!--      >-->
+<!--        Upload-->
+<!--      </button>-->
+<!--      <div v-if="isUploading">-->
+<!--        In progess, wait please ...-->
+<!--      </div>-->
+<!--    </div>-->
   </div>
 </template>
 
